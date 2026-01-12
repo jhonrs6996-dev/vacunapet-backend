@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+
+<style>
+    .login-background {
+        background: url("{{ url_for('static', filename='fondo_mascota.png') }}") no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .login-card {
+        background-color: rgba(255, 255, 255, 0.92);
+        border-radius: 10px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div class="login-background">
+
+    <div class="login-card">
+        <h2 class="text-center mb-4">Iniciar sesión</h2>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label class="form-label">Correo</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <button class="btn btn-primary w-100">Ingresar</button>
+        </form>
+
+        <p class="text-center mt-3">
+            ¿No tienes cuenta?
+            <a href="{{ url_for('register') }}">Regístrate aquí</a>
+        </p>
+    </div>
+
+</div>
+
+{% endblock %}
+

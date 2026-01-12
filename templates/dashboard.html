@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Mascotas{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Mis Mascotas</h2>
+
+<div class="row">
+
+  {% for mascota in mascotas %}
+  <div class="col-md-4 mb-4">
+    <div class="card shadow-sm">
+
+      <!-- FOTO -->
+      {% if mascota.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ mascota.foto) }}"
+             class="card-img-top"
+             style="height: 220px; object-fit: cover;">
+      {% else %}
+        <div class="d-flex align-items-center justify-content-center bg-light"
+             style="height: 220px; font-size: 4rem;">
+          🐾
+        </div>
+      {% endif %}
+
+      <div class="card-body">
+
+        <h4 class="card-title">{{ mascota.nombre }}</h4>
+
+        <p class="mb-1"><strong>Especie:</strong> {{ mascota.especie }}</p>
+        <p class="mb-1"><strong>Raza:</strong> {{ mascota.raza or "No especificada" }}</p>
+
+        {% if mascota.calcular_edad() %}
+          <p class="mb-1"><strong>Edad:</strong> {{ mascota.calcular_edad() }} años</p>
+        {% endif %}
+
+        <!-- ✅ NUEVOS CAMPOS -->
+        <p class="mb-1"><strong>Peso:</strong> {{ mascota.peso or "—" }} kg</p>
+        <p class="mb-1"><strong>Microchip:</strong> {{ mascota.microchip or "—" }}</p>
+        <p class="mb-3"><strong>Castrado:</strong> {{ 'Sí' if mascota.castrado else 'No' }}</p>
+
+        <a href="{{ url_for('view_pet', pet_id=mascota.id) }}" class="btn btn-primary btn-sm">Ver Perfil</a>
+        <a href="{{ url_for('editar_mascota', pet_id=mascota.id) }}" class="btn btn-warning btn-sm">Editar</a>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+
+<a href="{{ url_for('add_pet') }}" class="btn btn-success mt-3">Registrar Nueva Mascota</a>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Crear cuenta</h3>
+
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Apellido</label>
+                        <input type="text" name="apellido" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+
+                    <button class="btn btn-success w-100">Registrarse</button>
+                </form>
+
+                <p class="text-center mt-3">
+                    ¿Ya tienes cuenta?
+                    <a href="{{ url_for('login') }}">Inicia sesión aquí</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Vacuna{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Editar Vacuna</h2>
+
+<form method="POST" class="row g-3">
+
+  <div class="col-md-6">
+    <label class="form-label">Nombre de la vacuna</label>
+    <input type="text" name="nombre" class="form-control" value="{{ vacuna.nombre }}" required>
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Fecha de aplicación</label>
+    <input type="date" name="fecha_aplicacion" class="form-control"
+           value="{{ vacuna.fecha_aplicacion.strftime('%Y-%m-%d') if vacuna.fecha_aplicacion }}" required>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a href="{{ url_for('view_pet', pet_id=mascota.id) }}" class="btn btn-secondary">Cancelar</a>
+  </div>
+
+</form>
+
+{% endblock %}

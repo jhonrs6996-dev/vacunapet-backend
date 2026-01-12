@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Editar Diagnóstico{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">Editar Diagnóstico</h2>
+
+<form method="POST" class="row g-3">
+
+  <div class="col-md-6">
+    <label class="form-label">Título</label>
+    <input type="text" name="titulo" class="form-control" value="{{ diag.titulo }}" required>
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Fecha</label>
+    <input type="date" name="fecha" class="form-control"
+           value="{{ diag.fecha.strftime('%Y-%m-%d') if diag.fecha }}" required>
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">Descripción</label>
+    <textarea name="descripcion" class="form-control">{{ diag.descripcion }}</textarea>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a href="{{ url_for('view_pet', pet_id=mascota.id) }}" class="btn btn-secondary">Cancelar</a>
+  </div>
+
+</form>
+
+{% endblock %}

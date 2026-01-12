@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="Pagina_inicial.db" readonly="0" foreign_keys="0" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2643"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Configuracion_App" custom_title="0" dock_id="1" table="4,17:mainConfiguracion_App"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011e00ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">CREATE TABLE USUARIOS (
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT, -- SQLite usa INTEGER PRIMARY KEY AUTOINCREMENT
+    nombre_usuario TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    activo INTEGER DEFAULT 1 -- En SQLite, usamos INTEGER 1 (TRUE) o 0 (FALSE) para BOOLEAN
+);
+
+CREATE TABLE RESET_PASSWORDS (
+    id_token INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_usuario INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expiracion DATETIME NOT NULL,
+    
+    -- Definición de la Clave Foránea
+    FOREIGN KEY (id_usuario) REFERENCES USUARIOS (id_usuario)
+);
+
+INSERT INTO USUARIOS (nombre_usuario, email, password_hash)
+VALUES ('mi_usuario_sqlite', 'correo@ejemplo.com', 'el_hash_de_la_contraseña');
+
+SELECT id_usuario, password_hash, activo
+FROM USUARIOS
+WHERE nombre_usuario = 'mi_usuario_sqlite';
+
+-- 1. Insertar el nuevo usuario
+INSERT INTO USUARIOS (nombre_usuario, email, password_hash)
+VALUES ('Jhon_reg', 'Jhon@ejemplo.com', 'Jhon_hash_seguro');
+
+-- 2. Verificar la inserción buscando por el nombre de usuario
+SELECT id_usuario, nombre_usuario, email, activo, fecha_creacion
+FROM USUARIOS
+WHERE nombre_usuario = 'Jhon_reg';
+
+-- Buscar el registro completo del usuario 'alice_reg' para obtener su hash y estado 'activo'.
+SELECT id_usuario, password_hash, activo
+FROM USUARIOS
+WHERE nombre_usuario = 'Jhon_reg';
+
+-- Suponemos que la hora actual es 2025-12-03 10:30:00
+INSERT INTO RESET_PASSWORDS (id_usuario, token, expiracion)
+VALUES (1, 'c0de_uNiCo_para_Jhon_1234', '2025-12-03 23:59:00');
+
+SELECT
+    U.id_usuario,
+    U.email,
+    RP.expiracion
+FROM
+    USUARIOS AS U
+JOIN
+    RESET_PASSWORDS AS RP ON U.id_usuario = RP.id_usuario
+WHERE
+    RP.token = 'c0de_uNiCo_para_Jhon_1234'
+    AND RP.expiracion &gt; DATETIME('now');
+	
+	
+-- 1. SOLUCIÓN AL ERROR DE CLAVE FORÁNEA (FOREIGN KEY FAILED)
+-- Esto permite borrar tablas en cualquier orden, resolviendo el error de la línea 69.
+PRAGMA foreign_keys = OFF;
+
+---------------------------------------------------
+-- 2. ELIMINACIÓN DE TABLAS
+---------------------------------------------------
+
+-- Borrar primero las tablas para evitar el error &quot;table already exists&quot; (Línea 71)
+-- y el error FOREIGN KEY al desactivar las restricciones.
+DROP TABLE IF EXISTS Configuracion_App;
+DROP TABLE IF EXISTS Mascotas;
+DROP TABLE IF EXISTS Usuarios;
+
+
+---------------------------------------------------
+-- 3. CREACIÓN DE TABLAS (Secuencial y con correcciones)
+---------------------------------------------------
+
+-- TABLA 1: Usuarios
+CREATE TABLE Usuarios (
+    usuario_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
+);
+
+
+-- TABLA 2: Mascotas
+-- NOTA: Se corrige el tipo de dato en la línea 81 de &quot;TEXT NUMERIC&quot; (inválido) a &quot;TEXT&quot; o &quot;NUMERIC&quot;. Usaremos TEXT.
+CREATE TABLE Mascotas (
+    mascota_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id INTEGER NOT NULL,
+    nombre TEXT NOT NULL,         -- ¿Cuál es el nombre?
+    especie TEXT NOT NULL,        -- ¿Cuál es la especie?
+    raza TEXT,                    -- ¿Cuál es la raza?
+    sexo TEXT,                    -- ¿Y cuál es el sexo?
+    fecha_nacimiento TEXT,        -- ¿Y cuándo él (ella) nació? (AAAA-MM-DD)
+    es_castrado BOOLEAN,          -- ¿Es castrado(a)? (0=No, 1=Sí)
+    tiene_microchip BOOLEAN,      -- Microchip? (0=No, 1=Sí)
+    numero_microchip TEXT,        -- Corregido
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+);
+
+-- TABLA 3: Configuracion_App
+CREATE TABLE Configuracion_App (
+    config_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    menu_item TEXT NOT NULL,
+    visible BOOLEAN NOT NULL
+);
+
+
+---------------------------------------------------
+-- 4. SENTENCIAS DE INSERCIÓN (Poblar Datos)
+---------------------------------------------------
+
+-- Insertar el usuario Juan otalora
+INSERT INTO Usuarios (nombre, email) VALUES
+('Juan Otalora', 'Juanota@gmail.com');
+
+-- Insertar la mascota Apolo
+INSERT INTO Mascotas (usuario_id, nombre, especie, raza, sexo, fecha_nacimiento, es_castrado, tiene_microchip, numero_microchip) VALUES
+(1, 'Apolo', 'Perro', 'Golden Retriever', 'Macho', '2023-01-15', 1, 1, 'ABC123456');
+
+-- Insertar datos de configuración
+INSERT INTO Configuracion_App (menu_item, visible) VALUES
+('Meus Pets', 0),
+('Adicionar Mascota', 1),
+('Veterinários', 0),
+('Sair', 1);
+
+---------------------------------------------------
+-- 5. REACTIVAR RESTRICCIONES (Buenas prácticas)
+---------------------------------------------------
+PRAGMA foreign_keys = ON;
+
+-- SENTENCIA para añadir un nuevo registro de mascota
+INSERT INTO Mascotas (usuario_id, nombre, especie, raza, sexo, fecha_nacimiento, es_castrado, tiene_microchip, numero_microchip) VALUES
+(1, 'Tito', 'Gato', 'Siamés', 'Hembra', '2024-10-01', 0, 1, 'CAT98765');
+
+ALTER TABLE Mascotas ADD COLUMN peso NUMERIC;
+
+PRAGMA table_info(Mascotas);
+
+SELECT nombre, peso, raza FROM Mascotas WHERE nombre = 'Apolo';
+
+PRAGMA foreign_keys = OFF;
+
+-- *****************************************************************
+-- 1. CONFIGURACIÓN INICIAL Y ELIMINACIÓN DE TABLAS (LIMPIEZA)
+-- *****************************************************************
+
+-- Desactiva las restricciones de Clave Foránea para permitir el borrado de tablas en cualquier orden
+PRAGMA foreign_keys = OFF;
+
+-- Eliminación de todas las tablas para asegurar una ejecución limpia
+DROP TABLE IF EXISTS Configuracion_App;
+DROP TABLE IF EXISTS Mascotas;
+DROP TABLE IF EXISTS Usuarios;
+DROP TABLE IF EXISTS Vacinas;
+DROP TABLE IF EXISTS Veterinarios;
+
+
+---------------------------------------------------
+-- 2. CREACIÓN DE TABLAS (Sintaxis Corregida)
+---------------------------------------------------
+
+-- TABLA 1: Usuarios
+CREATE TABLE Usuarios (
+    usuario_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
+);
+
+-- TABLA 2: Mascotas (Perfil)
+CREATE TABLE Mascotas (
+    mascota_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id INTEGER NOT NULL,
+    nombre TEXT NOT NULL,
+    especie TEXT NOT NULL,
+    raza TEXT,
+    sexo TEXT,
+    fecha_nacimiento TEXT,
+    es_castrado BOOLEAN,
+    tiene_microchip BOOLEAN,
+    numero_microchip TEXT,
+    peso NUMERIC,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+);
+
+-- TABLA 3: Configuracion_App
+CREATE TABLE Configuracion_App (
+    config_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    menu_item TEXT NOT NULL,
+    visible BOOLEAN NOT NULL
+);
+
+-- TABLA 4: Veterinarios (SINTAXIS CORREGIDA: Se asegura el cierre de paréntesis y punto y coma)
+CREATE TABLE Veterinarios (
+    veterinario_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    crmv TEXT UNIQUE NOT NULL
+);
+
+-- TABLA 5: Vacinas (Historial)
+CREATE TABLE Vacinas (
+    vacina_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mascota_id INTEGER NOT NULL,
+    veterinario_id INTEGER,
+    nome_vacina TEXT NOT NULL,
+    marca TEXT,
+    data_aplicacao TEXT NOT NULL,
+    crmv_veterinario TEXT,
+    total_doses INTEGER,
+    partida TEXT,
+    data_fabricacao TEXT,
+    data_vencimento TEXT,
+    FOREIGN KEY (mascota_id) REFERENCES Mascotas(mascota_id),
+    FOREIGN KEY (veterinario_id) REFERENCES Veterinarios(veterinario_id)
+);
+
+
+---------------------------------------------------
+-- 3. SENTENCIAS DE INSERCIÓN (DATOS DE EJEMPLO)
+---------------------------------------------------
+
+-- Insertar el usuario Jhon Rãnos
+INSERT INTO Usuarios (nombre, email) VALUES
+('Jhon Rãnos', 'jhonrs6996@gmail.com');
+
+-- Insertar la mascota Apolo (ID=1)
+INSERT INTO Mascotas (usuario_id, nombre, especie, raza, sexo, fecha_nacimiento, es_castrado, tiene_microchip, numero_microchip, peso) VALUES
+(1, 'Apolo', 'Perro', 'Golden Retriever', 'Macho', '2020-12-25', 1, 1, '945000009367344', 40.0);
+
+-- Insertar datos de configuración
+INSERT INTO Configuracion_App (menu_item, visible) VALUES
+('Meus Pets', 0),
+('Adicionar Mascota', 1),
+('Veterinários', 0),
+('Sair', 1);
+
+-- Insertar un veterinario (Funcionará ahora que la tabla existe)
+INSERT INTO Veterinarios (nome, crmv) VALUES
+('Dr. João Silva', 'UF-00000');
+
+-- Insertar una vacuna para Apolo (Funcionará ahora que la tabla existe)
+INSERT INTO Vacinas (mascota_id, veterinario_id, nome_vacina, marca, data_aplicacao, crmv_veterinario, total_doses, partida, data_fabricacao, data_vencimento) VALUES
+(1, 1, 'V10', 'Marca X', '2025-12-03', 'UF-00000', 1, 'Lote 456', '2025-01-01', '2026-01-01');
+
+---------------------------------------------------
+-- 4. REACTIVAR RESTRICCIONES
+---------------------------------------------------
+PRAGMA foreign_keys = ON;
+
+
+-- *****************************************************************
+-- 1. CONFIGURACIÓN INICIAL Y ELIMINACIÓN DE TABLAS (LIMPIEZA)
+-- *****************************************************************
+PRAGMA foreign_keys = OFF;
+
+DROP TABLE IF EXISTS Configuracion_App;
+DROP TABLE IF EXISTS Vacinas;
+DROP TABLE IF EXISTS Veterinarios;
+DROP TABLE IF EXISTS Exames;      -- Nueva tabla: Exames
+DROP TABLE IF EXISTS Prevencoes;  -- Nueva tabla: Prevencoes
+DROP TABLE IF EXISTS Mascotas;
+DROP TABLE IF EXISTS Usuarios;
+
+
+---------------------------------------------------
+-- 2. CREACIÓN DE TABLAS
+---------------------------------------------------
+
+-- TABLA 1: Usuarios
+CREATE TABLE Usuarios (
+    usuario_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
+);
+
+-- TABLA 2: Mascotas (Perfil)
+CREATE TABLE Mascotas (
+    mascota_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id INTEGER NOT NULL,
+    nombre TEXT NOT NULL,
+    especie TEXT NOT NULL,
+    raza TEXT,
+    sexo TEXT,
+    fecha_nacimiento TEXT,
+    es_castrado BOOLEAN,
+    tiene_microchip BOOLEAN,
+    numero_microchip TEXT,
+    peso NUMERIC,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id)
+);
+
+-- TABLA 3: Configuracion_App
+CREATE TABLE Configuracion_App (
+    config_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    menu_item TEXT NOT NULL,
+    visible BOOLEAN NOT NULL
+);
+
+-- TABLA 4: Veterinarios
+CREATE TABLE Veterinarios (
+    veterinario_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    crmv TEXT UNIQUE NOT NULL
+);
+
+-- TABLA 5: Vacinas (Historial)
+CREATE TABLE Vacinas (
+    vacina_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mascota_id INTEGER NOT NULL,
+    veterinario_id INTEGER,
+    nome_vacina TEXT NOT NULL,
+    marca TEXT,
+    data_aplicacao TEXT NOT NULL,
+    crmv_veterinario TEXT,
+    total_doses INTEGER,
+    partida TEXT,
+    data_fabricacao TEXT,
+    data_vencimento TEXT,
+    FOREIGN KEY (mascota_id) REFERENCES Mascotas(mascota_id),
+    FOREIGN KEY (veterinario_id) REFERENCES Veterinarios(veterinario_id)
+);
+
+-- TABLA 6: Exames (Historial - Soluciona el error de &quot;no such table: Exames&quot;)
+CREATE TABLE Exames (
+    exame_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mascota_id INTEGER NOT NULL,
+    nome_exame TEXT NOT NULL,
+    data_exame TEXT NOT NULL,
+    detalles TEXT,
+    ruta_anexo TEXT,
+    FOREIGN KEY (mascota_id) REFERENCES Mascotas(mascota_id)
+);
+
+-- TABLA 7: Prevencoes (Historial - Para las &quot;5 Prevenções&quot; de la imagen)
+CREATE TABLE Prevencoes (
+    prevencion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mascota_id INTEGER NOT NULL,
+    tipo_prevencion TEXT NOT NULL, -- (Ej: Pulgas/Garrapatas, Vermifugación)
+    producto TEXT NOT NULL,
+    fecha_aplicacion TEXT NOT NULL,
+    proxima_fecha TEXT,
+    detalles TEXT,
+    FOREIGN KEY (mascota_id) REFERENCES Mascotas(mascota_id)
+);
+
+
+---------------------------------------------------
+-- 3. SENTENCIAS DE INSERCIÓN (DATOS DE EJEMPLO)
+---------------------------------------------------
+
+INSERT INTO Usuarios (nombre, email) VALUES ('Jhon Rãnos', 'jhonrs6996@gmail.com');
+
+INSERT INTO Mascotas (usuario_id, nombre, especie, raza, sexo, fecha_nacimiento, es_castrado, tiene_microchip, numero_microchip, peso) VALUES
+(1, 'Apolo', 'Perro', 'Golden Retriever', 'Macho', '2020-12-25', 1, 1, '945000009367344', 40.0);
+
+INSERT INTO Configuracion_App (menu_item, visible) VALUES
+('Meus Pets', 0), ('Adicionar Mascota', 1), ('Veterinários', 0), ('Sair', 1);
+
+INSERT INTO Veterinarios (nome, crmv) VALUES ('Dr. João Silva', 'UF-00000');
+
+INSERT INTO Vacinas (mascota_id, veterinario_id, nome_vacina, marca, data_aplicacao, crmv_veterinario, total_doses, partida, data_fabricacao, data_vencimento) VALUES
+(1, 1, 'V10', 'Marca X', '2025-12-03', 'UF-00000', 1, 'Lote 456', '2025-01-01', '2026-01-01');
+
+-- Insertar 1 Exame para Apolo (para que el contador del Histórico sea 1)
+INSERT INTO Exames (mascota_id, nome_exame, data_exame, detalles, ruta_anexo) VALUES
+(1, 'Hemograma Completo', '2025-11-20', 'Resultados dentro del rango normal.', 'documentos/apolo_hemo_20251120.pdf');
+
+-- Insertar 5 Prevenciones para Apolo (para que el contador del Histórico sea 5)
+INSERT INTO Prevencoes (mascota_id, tipo_prevencao, produto, data_aplicacao, proxima_data, detalles) VALUES
+(1, '', '', '', '', ''),
+(1, '', '', '', '', ''),
+(1, '', '', '', '', ''),
+(1, '', 'l', '', '', ''),
+(1, '', '', '', '', '');
+
+
+---------------------------------------------------
+-- 4. REACTIVAR RESTRICCIONES
+---------------------------------------------------
+PRAGMA foreign_keys = ON;</sql><current_tab id="0"/></tab_sql></sqlb_project>

@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ mascota.nombre }}{% endblock %}
+
+{# If your base.html has a <head> block, keep this. Otherwise, add the link in base.html #}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    /* Dark theme */
+    body { background-color: #1e1e2f; }
+    .card-dark { background-color: #2c2c3c; color: #fff; border: none; }
+    .card-muted { background-color: #2a2a38; color: #fff; border: none; }
+    .text-soft { color: #c9c9d1 !important; }
+    .chip {
+      background: #3b3b4a;
+      color: #eaeaf2;
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title {
+      color: #eaeaf2;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    /* Accent colors similar to your screenshots */
+    .accent-edit { background-color: #f1c40f; color: #1e1e2f; }
+    .accent-delete { background-color: #e74c3c; color: #fff; }
+    .accent-add { background-color: #2ecc71; color: #1e1e2f; }
+    .accent-info { color: #3498db; }
+    .accent-warning { color: #f1c40f; }
+    .accent-danger { color: #e74c3c; }
+    .accent-success { color: #2ecc71; }
+
+    .btn-sm { padding: 6px 10px; }
+    .form-dark .form-control,
+    .form-dark .form-select,
+    .form-dark textarea {
+      background-color: #2a2a38;
+      border: 1px solid #3b3b4a;
+      color: #eaeaf2;
+    }
+    .form-dark .form-control::placeholder,
+    .form-dark textarea::placeholder { color: #a7a7b6; }
+    .divider { border-top: 1px solid #3b3b4a; margin: 24px 0; }
+  </style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header: pet identity -->
+<div class="card card-dark mb-4 p-3 rounded">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      {% if mascota.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ mascota.foto) }}"
+             class="rounded-circle me-3"
+             style="width: 80px; height: 80px; object-fit: cover;">
+      {% else %}
+        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center"
+             style="width: 80px; height: 80px; background:#3b3b4a; font-size: 1.5rem;">
+          🐾
+        </div>
+      {% endif %}
+      <div>
+        <h3 class="mb-1">{{ mascota.nombre }}</h3>
+        <div class="text-soft">
+          {{ mascota.raza or '—' }} • {{ mascota.especie }}{% if mascota.calcular_edad() %} • {{ mascota.calcular_edad() }} años{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('editar_mascota', pet_id=mascota.id) }}" class="btn accent-edit btn-sm">Editar perfil</a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">Volver</a>
+      <form method="POST" action="{{ url_for('delete_pet', pet_id=mascota.id) }}"
+            onsubmit="return confirm('¿Eliminar esta mascota? Esta acción no se puede deshacer.');">
+        <button class="btn accent-delete btn-sm">Eliminar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-3 d-flex flex-wrap gap-2">
+    {% if mascota.peso %}
+      <span class="chip"><i class="bi bi-graph-up-arrow"></i> {{ mascota.peso }} Kg</span>
+    {% endif %}
+    {% if mascota.microchip %}
+      <span class="chip"><i class="bi bi-cpu"></i> {{ mascota.microchip }}</span>
+    {% endif %}
+    <span class="chip"><i class="bi bi-scissors"></i> {{ 'Castrado' if mascota.castrado else 'No castrado' }}</span>
+  </div>
+</div>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<!-- Summary counters -->
+<div class="row mb-4">
+  <div class="col-6 col-md-4 mb-3">
+    <div class="card card-muted p-3 text-center rounded">
+      <i class="bi bi-syringe fs-3 accent-info"></i>
+      <h6 class="mt-2 mb-0 text-soft">Vacunas</h6>
+      <div class="fs-5">{{ mascota.vacunas|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 mb-3">
+    <div class="card card-muted p-3 text-center rounded">
+      <i class="bi bi-shield-plus fs-3 accent-success"></i>
+      <h6 class="mt-2 mb-0 text-soft">Prevenciones</h6>
+      <div class="fs-5">{{ mascota.prevenciones|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 mb-3">
+    <div class="card card-muted p-3 text-center rounded">
+      <i class="bi bi-file-medical fs-3 accent-warning"></i>
+      <h6 class="mt-2 mb-0 text-soft">Diagnósticos</h6>
+      <div class="fs-5">{{ mascota.diagnosticos|length }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 mb-3">
+    <div class="card card-muted p-3 text-center rounded">
+      <i class="bi bi-capsule fs-3 accent-danger"></i>
+      <h6 class="mt-2 mb-0 text-soft">Recetas</h6>
+      <div class="fs-5">{{ mascota.recetas|length }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Vaccines section -->
+<h4 class="section-title"><i class="bi bi-syringe me-2 accent-info"></i>Vacunas</h4>
+
+<div class="card card-dark mb-3 p-3 rounded">
+  <form method="POST" action="{{ url_for('add_vacuna', pet_id=mascota.id) }}" class="row g-3 form-dark">
+    <div class="col-md-6">
+      <label class="form-label text-soft">Nombre de la vacuna *</label>
+      <input type="text" name="nombre" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label text-soft">Fecha de aplicación *</label>
+      <input type="date" name="fecha_aplicacion" class="form-control" required>
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <button class="btn accent-add btn-sm">Agregar vacuna</button>
+    </div>
+  </form>
+</div>
+
+{% for vacuna in mascota.vacunas %}
+  <div class="card card-dark mb-2 p-3 rounded">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-semibold"><i class="bi bi-syringe me-2 accent-info"></i>{{ vacuna.nombre }}</div>
+        <small class="text-soft">Aplicada: {{ vacuna.fecha_aplicacion }}</small>
+      </div>
+      <div class="d-flex gap-2" style="min-width: 240px;">
+        <form method="GET" action="{{ url_for('edit_vacuna', pet_id=mascota.id, vacuna_id=vacuna.id) }}" class="w-100">
+          <button class="btn accent-edit btn-sm w-100">Editar</button>
+        </form>
+        <form method="POST" action="{{ url_for('delete_vacuna', pet_id=mascota.id, vacuna_id=vacuna.id) }}" class="w-100">
+          <button class="btn accent-delete btn-sm w-100">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-soft">No hay vacunas registradas.</p>
+{% endfor %}
+
+<div class="divider"></div>
+
+<!-- Diagnoses section -->
+<h4 class="section-title"><i class="bi bi-file-medical me-2 accent-warning"></i>Diagnósticos</h4>
+
+<div class="card card-dark mb-3 p-3 rounded">
+  <form method="POST" action="{{ url_for('add_diagnostico', pet_id=mascota.id) }}" class="row g-3 form-dark">
+    <div class="col-md-6">
+      <label class="form-label text-soft">Título *</label>
+      <input type="text" name="titulo" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label text-soft">Fecha *</label>
+      <input type="date" name="fecha" class="form-control" required>
+    </div>
+    <div class="col-12">
+      <label class="form-label text-soft">Descripción</label>
+      <textarea name="descripcion" class="form-control" rows="2" placeholder="Detalles relevantes"></textarea>
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <button class="btn accent-add btn-sm">Agregar diagnóstico</button>
+    </div>
+  </form>
+</div>
+
+{% for diag in mascota.diagnosticos %}
+  <div class="card card-dark mb-2 p-3 rounded">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <div class="fw-semibold"><i class="bi bi-file-earmark-text me-2 accent-warning"></i>{{ diag.titulo }}</div>
+        <small class="text-soft">Fecha: {{ diag.fecha }}</small>
+        {% if diag.descripcion %}
+          <div class="mt-2 text-soft">{{ diag.descripcion }}</div>
+        {% endif %}
+      </div>
+      <div class="d-flex gap-2" style="min-width: 240px;">
+        <form method="GET" action="{{ url_for('edit_diagnostico', pet_id=mascota.id, diag_id=diag.id) }}" class="w-100">
+          <button class="btn accent-edit btn-sm w-100">Editar</button>
+        </form>
+        <form method="POST" action="{{ url_for('delete_diagnostico', pet_id=mascota.id, diag_id=diag.id) }}" class="w-100">
+          <button class="btn accent-delete btn-sm w-100">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-soft">No hay diagnósticos registrados.</p>
+{% endfor %}
+
+<div class="divider"></div>
+
+<!-- Prescriptions section -->
+<h4 class="section-title"><i class="bi bi-capsule me-2 accent-danger"></i>Recetas</h4>
+
+<div class="card card-dark mb-3 p-3 rounded">
+  <form method="POST" action="{{ url_for('add_receta', pet_id=mascota.id) }}" class="row g-3 form-dark">
+    <div class="col-md-4">
+      <label class="form-label text-soft">Medicamento *</label>
+      <input type="text" name="medicamento" class="form-control" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label text-soft">Dosis *</label>
+      <input type="text" name="dosis" class="form-control" required placeholder="Ej: 1 comprimido / 12h">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label text-soft">Fecha *</label>
+      <input type="date" name="fecha" class="form-control" required>
+    </div>
+    <div class="col-12">
+      <label class="form-label text-soft">Instrucciones</label>
+      <textarea name="instrucciones" class="form-control" rows="2" placeholder="Modo de administración, duración, etc."></textarea>
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <button class="btn accent-add btn-sm">Agregar receta</button>
+    </div>
+  </form>
+</div>
+
+{% for receta in mascota.recetas %}
+  <div class="card card-dark mb-2 p-3 rounded">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <div class="fw-semibold"><i class="bi bi-capsule-pill me-2 accent-danger"></i>{{ receta.medicamento }}</div>
+        <small class="text-soft">Fecha: {{ receta.fecha }}</small>
+        {% if receta.dosis %}
+          <div class="mt-1 text-soft">Dosis: {{ receta.dosis }}</div>
+        {% endif %}
+        {% if receta.instrucciones %}
+          <div class="mt-1 text-soft">{{ receta.instrucciones }}</div>
+        {% endif %}
+      </div>
+      <div class="d-flex gap-2" style="min-width: 240px;">
+        <form method="GET" action="{{ url_for('edit_receta', pet_id=mascota.id, receta_id=receta.id) }}" class="w-100">
+          <button class="btn accent-edit btn-sm w-100">Editar</button>
+        </form>
+        <form method="POST" action="{{ url_for('delete_receta', pet_id=mascota.id, receta_id=receta.id) }}" class="w-100">
+          <button class="btn accent-delete btn-sm w-100">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-soft">No hay recetas registradas.</p>
+{% endfor %}
+
+<div class="divider"></div>
+
+<!-- Preventions section -->
+<h4 class="section-title"><i class="bi bi-shield-plus me-2 accent-success"></i>Prevenciones</h4>
+
+<div class="card card-dark mb-3 p-3 rounded">
+  <form method="POST" action="{{ url_for('add_prevencion', pet_id=mascota.id) }}" class="row g-3 form-dark">
+    <div class="col-md-4">
+      <label class="form-label text-soft">Tipo *</label>
+      <input type="text" name="tipo" class="form-control" required placeholder="Ej: Antiparasitario, Antipulgas">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label text-soft">Fecha *</label>
+      <input type="date" name="fecha" class="form-control" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label text-soft">Descripción</label>
+      <input type="text" name="descripcion" class="form-control" placeholder="Detalles (marca, dosis, etc.)">
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <button class="btn accent-add btn-sm">Agregar prevención</button>
+    </div>
+  </form>
+</div>
+
+{% for prev in mascota.prevenciones %}
+  <div class="card card-dark mb-2 p-3 rounded">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-semibold"><i class="bi bi-shield-check me-2 accent-success"></i>{{ prev.tipo }}</div>
+        <small class="text-soft">Fecha: {{ prev.fecha }}</small>
+        {% if prev.descripcion %}
+          <div class="mt-1 text-soft">{{ prev.descripcion }}</div>
+        {% endif %}
+      </div>
+      <div class="d-flex gap-2" style="min-width: 240px;">
+        <form method="GET" action="{{ url_for('edit_prevencion', pet_id=mascota.id, prev_id=prev.id) }}" class="w-100">
+          <button class="btn accent-edit btn-sm w-100">Editar</button>
+        </form>
+        <form method="POST" action="{{ url_for('delete_prevencion', pet_id=mascota.id, prev_id=prev.id) }}" class="w-100">
+          <button class="btn accent-delete btn-sm w-100">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-soft">No hay prevenciones registradas.</p>
+{% endfor %}
+
+{% endblock %}

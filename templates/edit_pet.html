@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Mascota{% endblock %}
+
+{% block content %}
+
+
+<h2>Editar Mascota</h2>
+
+
+
+<form method="POST" action="{{ url_for('editar_mascota', pet_id=mascota.id) }}" enctype="multipart/form-data">
+
+    <div class="col-md-4">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ mascota.nombre }}" required>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Especie</label>
+        <input type="text" name="especie" class="form-control" value="{{ mascota.especie }}" required>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Raza</label>
+        <input type="text" name="raza" class="form-control" value="{{ mascota.raza }}">
+    </div>
+
+    <div class="col-md-4">
+    <label class="form-label">Fecha de nacimiento</label>
+    <input type="date" name="fecha_nacimiento" class="form-control"
+           value="{{ mascota.fecha_nacimiento }}">
+</div>
+
+
+       <div class="col-md-12">
+        <label class="form-label">Foto (opcional)</label>
+        <input type="file" name="foto" class="form-control">
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-success">Guardar cambios</button>
+        <a href="{{ url_for('view_pet', pet_id=mascota.id) }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+
+</form>
+{% endblock %}

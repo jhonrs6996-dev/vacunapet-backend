@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="text-center mb-4">
+    <img src="{{ url_for('static', filename='fondo_mascota.png') }}"
+         class="img-fluid rounded shadow-sm" alt="Mascotas">
+</div>
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+
+        <h2 class="fw-bold mb-3">Acerca de esta aplicación</h2>
+
+        <p>
+            Esta es una aplicación sencilla para llevar el control de mascotas.
+            Permite registrar mascotas, ver su información, editarla y eliminarlas.
+            También se pueden guardar vacunas, diagnósticos, recetas y prevenciones.
+        </p>
+
+        <p>
+            La idea principal es tener todo en un solo lugar, de forma ordenada y fácil de usar.
+            El sistema calcula la edad de cada mascota automáticamente según su fecha de nacimiento.
+        </p>
+
+        <h4 class="mt-4">¿Cómo funciona?</h4>
+
+        <ul>
+            <li>El usuario se registra e inicia sesión.</li>
+            <li>En el dashboard ve todas sus mascotas.</li>
+            <li>Puede agregar nuevas mascotas con nombre, especie, raza, foto y fecha de nacimiento.</li>
+            <li>Al ver una mascota, aparece su perfil completo con su información.</li>
+            <li>Se pueden agregar vacunas, diagnósticos, recetas y prevenciones.</li>
+            <li>Todo queda guardado en la base de datos.</li>
+        </ul>
+
+        <h4 class="mt-4">Tecnologías utilizadas</h4>
+
+        <ul>
+            <li>Python + Flask</li>
+            <li>SQLite para guardar los datos</li>
+            <li>Bootstrap para el diseño</li>
+            <li>HTML para las pantallas</li>
+        </ul>
+
+        <p class="mt-4">
+            Este proyecto fue desarrollado con fines educativos, buscando crear algo funcional,
+            simple y coherente con los conocimientos del estudiante.
+        </p>
+
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Volver</a>
+
+    </div>
+</div>
+
+{% endblock %}

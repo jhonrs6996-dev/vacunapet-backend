@@ -1,0 +1,93 @@
+/* ====== Estilo global ====== */
+body {
+  background-color: #1e1e2f;
+  color: #eaeaf2;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* ====== Tarjetas oscuras ====== */
+.card-dark {
+  background-color: #3a3c2c;
+  color: #3a05fa;
+  border: none;
+  border-radius: 8px;
+}
+
+.card-muted {
+  background-color: #2a2a38;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+}
+
+/* ====== Línea compacta de información ====== */
+.chip {
+  background: #3b3b4a;
+  color: #eaeaf2;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+/* ====== Botones de acción ====== */
+.accent-edit {
+  background-color: #f1c40f;
+  color: #1e1e2f;
+  border: none;
+}
+.accent-delete {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+}
+.accent-add {
+  background-color: #2ecc71;
+  color: #1e1e2f;
+  border: none;
+}
+
+/* ====== Texto suave ====== */
+.text-soft {
+  color: #c9c9d1 !important;
+}
+
+/* ====== Formularios oscuros ====== */
+.form-dark .form-control,
+.form-dark textarea,
+.form-dark select {
+  background-color: #2a2a38;
+  border: 1px solid #3b3b4a;
+  color: #eaeaf2;
+}
+.form-dark .form-control::placeholder,
+.form-dark textarea::placeholder {
+  color: #a7a7b6;
+}
+
+/* ====== Separadores ====== */
+.divider {
+  border-top: 1px solid #3b3b4a;
+  margin: 24px 0;
+}
+
+/* ====== Íconos de resumen ====== */
+.summary-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+.summary-card {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* ====== Ajustes de botones pequeños ====== */
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
