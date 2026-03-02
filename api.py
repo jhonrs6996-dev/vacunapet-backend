@@ -36,7 +36,7 @@ def obtener_usuario(id):
 
 
 # ============================================================
-# ACTUALIZAR USUARIO COMPLETO (NUEVO)
+# ACTUALIZAR USUARIO COMPLETO
 # ============================================================
 @api.route('/usuario/<int:id>', methods=['PUT'])
 def actualizar_usuario(id):
@@ -51,7 +51,6 @@ def actualizar_usuario(id):
     usuario.apellido = data.get("apellido", usuario.apellido)
     usuario.email = data.get("email", usuario.email)
 
-    # Foto opcional
     if "foto" in data:
         usuario.foto = data.get("foto")
 
@@ -271,6 +270,17 @@ def agregar_vacuna():
     return jsonify({"success": True, "message": "Vacuna agregada", "id": nueva.id}), 201
 
 
+@api.route('/vacunas/<int:id>', methods=['DELETE'])
+def eliminar_vacuna(id):
+    vacuna = Vacuna.query.get(id)
+    if not vacuna:
+        return jsonify({"success": False, "message": "Vacuna no encontrada"}), 404
+
+    db.session.delete(vacuna)
+    db.session.commit()
+    return jsonify({"success": True, "message": "Vacuna eliminada"}), 200
+
+
 # ============================================================
 # DIAGNÓSTICOS
 # ============================================================
@@ -310,6 +320,17 @@ def agregar_diagnostico():
     db.session.commit()
 
     return jsonify({"success": True, "message": "Diagnóstico agregado", "id": nuevo.id}), 201
+
+
+@api.route('/diagnosticos/<int:id>', methods=['DELETE'])
+def eliminar_diagnostico(id):
+    diag = Diagnostico.query.get(id)
+    if not diag:
+        return jsonify({"success": False, "message": "Diagnóstico no encontrado"}), 404
+
+    db.session.delete(diag)
+    db.session.commit()
+    return jsonify({"success": True, "message": "Diagnóstico eliminado"}), 200
 
 
 # ============================================================
@@ -355,6 +376,17 @@ def agregar_receta():
     return jsonify({"success": True, "message": "Receta agregada", "id": nueva.id}), 201
 
 
+@api.route('/recetas/<int:id>', methods=['DELETE'])
+def eliminar_receta(id):
+    receta = Receta.query.get(id)
+    if not receta:
+        return jsonify({"success": False, "message": "Receta no encontrada"}), 404
+
+    db.session.delete(receta)
+    db.session.commit()
+    return jsonify({"success": True, "message": "Receta eliminada"}), 200
+
+
 # ============================================================
 # PREVENCIONES
 # ============================================================
@@ -394,3 +426,14 @@ def agregar_prevencion():
     db.session.commit()
 
     return jsonify({"success": True, "message": "Prevención agregada", "id": nueva.id}), 201
+
+
+@api.route('/prevenciones/<int:id>', methods=['DELETE'])
+def eliminar_prevencion(id):
+    prev = Prevencion.query.get(id)
+    if not prev:
+        return jsonify({"success": False, "message": "Prevención no encontrada"}), 404
+
+    db.session.delete(prev)
+    db.session.commit()
+    return jsonify({"success": True, "message": "Prevención eliminada"}), 200
