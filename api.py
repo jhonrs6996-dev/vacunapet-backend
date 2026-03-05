@@ -270,6 +270,22 @@ def agregar_vacuna():
     return jsonify({"success": True, "message": "Vacuna agregada", "id": nueva.id}), 201
 
 
+@api.route('/vacunas/<int:id>', methods=['PUT'])
+def actualizar_vacuna(id):
+    vacuna = Vacuna.query.get(id)
+    if not vacuna:
+        return jsonify({"success": False, "message": "Vacuna no encontrada"}), 404
+
+    data = request.get_json() or {}
+
+    vacuna.nombre = data.get("nombre", vacuna.nombre)
+    vacuna.fecha_aplicacion = date.fromisoformat(data.get("fecha_aplicacion")) if data.get("fecha_aplicacion") else vacuna.fecha_aplicacion
+
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Vacuna actualizada"}), 200
+
+
 @api.route('/vacunas/<int:id>', methods=['DELETE'])
 def eliminar_vacuna(id):
     vacuna = Vacuna.query.get(id)
@@ -320,6 +336,23 @@ def agregar_diagnostico():
     db.session.commit()
 
     return jsonify({"success": True, "message": "Diagnóstico agregado", "id": nuevo.id}), 201
+
+
+@api.route('/diagnosticos/<int:id>', methods=['PUT'])
+def actualizar_diagnostico(id):
+    diag = Diagnostico.query.get(id)
+    if not diag:
+        return jsonify({"success": False, "message": "Diagnóstico no encontrado"}), 404
+
+    data = request.get_json() or {}
+
+    diag.titulo = data.get("titulo", diag.titulo)
+    diag.fecha = date.fromisoformat(data.get("fecha")) if data.get("fecha") else diag.fecha
+    diag.descripcion = data.get("descripcion", diag.descripcion)
+
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Diagnóstico actualizado"}), 200
 
 
 @api.route('/diagnosticos/<int:id>', methods=['DELETE'])
@@ -376,6 +409,24 @@ def agregar_receta():
     return jsonify({"success": True, "message": "Receta agregada", "id": nueva.id}), 201
 
 
+@api.route('/recetas/<int:id>', methods=['PUT'])
+def actualizar_receta(id):
+    receta = Receta.query.get(id)
+    if not receta:
+        return jsonify({"success": False, "message": "Receta no encontrada"}), 404
+
+    data = request.get_json() or {}
+
+    receta.medicamento = data.get("medicamento", receta.medicamento)
+    receta.dosis = data.get("dosis", receta.dosis)
+    receta.fecha = date.fromisoformat(data.get("fecha")) if data.get("fecha") else receta.fecha
+    receta.instrucciones = data.get("instrucciones", receta.instrucciones)
+
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Receta actualizada"}), 200
+
+
 @api.route('/recetas/<int:id>', methods=['DELETE'])
 def eliminar_receta(id):
     receta = Receta.query.get(id)
@@ -426,6 +477,23 @@ def agregar_prevencion():
     db.session.commit()
 
     return jsonify({"success": True, "message": "Prevención agregada", "id": nueva.id}), 201
+
+
+@api.route('/prevenciones/<int:id>', methods=['PUT'])
+def actualizar_prevencion(id):
+    prev = Prevencion.query.get(id)
+    if not prev:
+        return jsonify({"success": False, "message": "Prevención no encontrada"}), 404
+
+    data = request.get_json() or {}
+
+    prev.tipo = data.get("tipo", prev.tipo)
+    prev.fecha = date.fromisoformat(data.get("fecha")) if data.get("fecha") else prev.fecha
+    prev.descripcion = data.get("descripcion", prev.descripcion)
+
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Prevención actualizada"}), 200
 
 
 @api.route('/prevenciones/<int:id>', methods=['DELETE'])
