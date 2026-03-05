@@ -18,7 +18,7 @@ from flask_login import (
     current_user,
 )
 from werkzeug.utils import secure_filename
-    from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import db, Usuario, Mascota, Vacuna, Diagnostico, Receta, Prevencion
 from api import api  # Blueprint con la API REST
